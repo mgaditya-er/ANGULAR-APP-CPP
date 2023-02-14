@@ -1,24 +1,20 @@
 version: 0.2
 
-env:
-    variables:
-        CACHE_CONTROL: "86400"
-        S3_BUCKET: "{{s3_bucket_url}}"
-        BUILD_FOLDER: "dist"
 phases:
   install:
     runtime-versions:
-        nodejs: 16
+      nodejs: 16
     commands:
-        - echo Installing source NPM dependencies...
-        - npm install
-        - npm install -g @angular/cli
+      - npm install -g @angular/cli
+      - npm install
+  pre_build:
+    commands:
+      - ng build --prod
   build:
     commands:
-        - echo Build started
-        - ng build
+      - aws s3 sync ./dist/ s3://arn:aws:s3:::angular-app-cpp1 --delete
+
 artifacts:
-    files:
-        - '**/*'
-    base-directory: 'dist*'
-    discard-paths: yes
+  files:
+    - '**/*'
+  base-directory: 'dist'
